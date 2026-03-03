@@ -3,7 +3,7 @@
  *
  * Thin client to the local toq daemon. The daemon handles all protocol
  * complexity (crypto, TLS, handshake, connections). This SDK provides
- * sync and async interfaces for agent code.
+ * an async interface for agent code.
  *
  * Usage:
  *   import { connect } from 'toq';
