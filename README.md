@@ -37,6 +37,9 @@ for await (const msg of client.messages()) {
 |--------|-------------|
 | `send(to, text)` | Send a message |
 | `messages()` | Stream incoming messages (async generator) |
+| `cancelMessage(id)` | Cancel a sent message |
+| `sendStreaming(to, text)` | Streaming delivery |
+| `getThread(threadId)` | Get messages in a thread |
 | `peers()` | List known peers |
 | `block(key)` / `unblock(key)` | Block/unblock an agent |
 | `approvals()` | List pending approvals |
