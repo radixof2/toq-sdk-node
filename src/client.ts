@@ -159,11 +159,11 @@ export class Client {
   }
 
   async block(publicKey: string): Promise<void> {
-    await this.request("POST", `/v1/peers/${publicKey}/block`);
+    await this.request("POST", `/v1/peers/${encodeURIComponent(publicKey)}/block`);
   }
 
   async unblock(publicKey: string): Promise<void> {
-    await this.request("DELETE", `/v1/peers/${publicKey}/block`);
+    await this.request("DELETE", `/v1/peers/${encodeURIComponent(publicKey)}/block`);
   }
 
   // ── Approvals ────────────────────────────────────────
@@ -173,13 +173,13 @@ export class Client {
   }
 
   async approve(id: string): Promise<void> {
-    await this.request("POST", `/v1/approvals/${id}`, {
+    await this.request("POST", `/v1/approvals/${encodeURIComponent(id)}`, {
       json: { decision: "approve" },
     });
   }
 
   async deny(id: string): Promise<void> {
-    await this.request("POST", `/v1/approvals/${id}`, {
+    await this.request("POST", `/v1/approvals/${encodeURIComponent(id)}`, {
       json: { decision: "deny" },
     });
   }
