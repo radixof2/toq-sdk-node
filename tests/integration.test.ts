@@ -242,9 +242,9 @@ describe("SDK against real daemon", () => {
 
   it("revoke removes approved peer", async () => {
     const client = alice();
-    const fakeKey = "ed25519:dGVzdGtleQ==";
+    // Use a valid-length Ed25519 key (32 bytes base64-encoded)
+    const fakeKey = "ed25519:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
     await client.approve(fakeKey);
-    // Should not throw
     await client.revoke(fakeKey);
   });
 
