@@ -99,8 +99,13 @@ export class Client {
     });
   }
 
-  async *messages(): AsyncGenerator<Message> {
-    const resp = await this.request("GET", "/v1/messages");
+  async *messages(options?: { from?: string; type?: string }): AsyncGenerator<Message> {
+    const params: Record<string, string> = {};
+    if (options?.from) params.from = options.from;
+    if (options?.type) params.type = options.type;
+    const resp = await this.request("GET", "/v1/messages", {
+      params: Object.keys(params).length ? params : undefined,
+    });
     const reader = resp.body?.getReader();
     if (!reader) return;
     const decoder = new TextDecoder();
@@ -362,5 +367,49 @@ export class Client {
 
   async card(): Promise<Record<string, unknown>> {
     return this.json("GET", "/v1/card");
+  }
+
+  // ── Handlers ─────────────────────────────────────────
+
+  async handlers(): Promise<unknown[]> {
+    return ((await this.json("GET", "/v1/handlers")) as any).handlers;
+  }
+
+  async addHandler(
+    name: string,
+    command: string,
+    options?: {
+      filter_from?: string[];
+      filter_key?: string[];
+      filter_type?: string[];
+    }
+  ): Promise<Record<string, unknown>> {
+    const body: Record<string, unknown> = { name, command };
+    if (options?.filter_from) body.filter_from = options.filter_from;
+    if (options?.filter_key) body.filter_key = options.filter_key;
+    if (options?.filter_type) body.filter_type = options.filter_type;
+    return this.json("POST", "/v1/handlers", { json: body });
+  }
+
+  async removeHandler(name: string): Promise<Record<string, unknown>> {
+    return this.json("DELETE", `/v1/handlers/${encodeURIComponent(name)}`);
+  }
+
+  async updateHandler(
+    name: string,
+    updates: Record<string, unknown>
+  ): Promise<Record<string, unknown>> {
+    return this.json("PUT", `/v1/handlers/${encodeURIComponent(name)}`, {
+      json: updates,
+    });
+  }
+
+  async stopHandler(
+    name: string,
+    pid?: number
+  ): Promise<Record<string, unknown>> {
+    const body: Record<string, unknown> = { name };
+    if (pid !== undefined) body.pid = pid;
+    return this.json("POST", "/v1/handlers/stop", { json: body });
   }
 }

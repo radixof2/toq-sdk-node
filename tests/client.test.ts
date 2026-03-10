@@ -140,4 +140,51 @@ describe("Client methods with mocked fetch", () => {
     mockFetch({ error: { code: "invalid", message: "bad" } }, 400);
     await expect(client.send("toq://host/agent", "hi")).rejects.toThrow(ToqError);
   });
+
+  it("handlers calls GET /v1/handlers", async () => {
+    mockFetch({ handlers: [{ name: "h1", command: "echo", enabled: true, active: 0 }] });
+    const result = await client.handlers();
+    expect(result).toHaveLength(1);
+    expect(result[0]).toHaveProperty("name", "h1");
+  });
+
+  it("addHandler calls POST /v1/handlers", async () => {
+    mockFetch({ status: "added", name: "test" });
+    const result = await client.addHandler("test", "echo hi", { filter_from: ["toq://host/*"] });
+    expect(result).toHaveProperty("status", "added");
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining("/v1/handlers"),
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("removeHandler calls DELETE /v1/handlers/{name}", async () => {
+    mockFetch({ status: "removed", name: "test" });
+    const result = await client.removeHandler("test");
+    expect(result).toHaveProperty("status", "removed");
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining("/v1/handlers/test"),
+      expect.objectContaining({ method: "DELETE" }),
+    );
+  });
+
+  it("updateHandler calls PUT /v1/handlers/{name}", async () => {
+    mockFetch({ status: "updated", name: "test" });
+    const result = await client.updateHandler("test", { enabled: false });
+    expect(result).toHaveProperty("status", "updated");
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining("/v1/handlers/test"),
+      expect.objectContaining({ method: "PUT" }),
+    );
+  });
+
+  it("stopHandler calls POST /v1/handlers/stop", async () => {
+    mockFetch({ stopped: 2, name: "test" });
+    const result = await client.stopHandler("test");
+    expect(result).toHaveProperty("stopped", 2);
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining("/v1/handlers/stop"),
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
 });
