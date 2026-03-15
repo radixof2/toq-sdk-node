@@ -32,7 +32,7 @@ describe("connect", () => {
     const origCwd = process.cwd();
     process.chdir(dir);
     fs.mkdirSync(path.join(dir, ".toq"));
-    fs.writeFileSync(path.join(dir, ".toq", "state.json"), '{"api_port": 9042}');
+    fs.writeFileSync(path.join(dir, ".toq", "state.json"), '{"port": 9042}');
     delete process.env.TOQ_API_URL;
     const client = connect();
     expect(client).toBeInstanceOf(Client);
@@ -54,7 +54,7 @@ describe("Client methods with mocked fetch", () => {
   let client: Client;
 
   beforeEach(() => {
-    client = connect("http://localhost:9010");
+    client = connect("http://localhost:9009");
   });
 
   function mockFetch(body: unknown, status = 200) {

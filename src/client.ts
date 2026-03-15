@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 
-const DEFAULT_URL = "http://127.0.0.1:9010";
+const DEFAULT_URL = "http://127.0.0.1:9009";
 const URL_ENV = "TOQ_API_URL";
 const DAEMON_NOT_RUNNING = "toq daemon is not running. Run 'toq up' first.";
 
@@ -13,7 +13,7 @@ function resolveUrl(url?: string): string {
   if (existsSync(statePath)) {
     try {
       const state = JSON.parse(readFileSync(statePath, "utf-8"));
-      if (state.api_port) return `http://127.0.0.1:${state.api_port}`;
+      if (state.port) return `http://127.0.0.1:${state.port}`;
     } catch {}
   }
   return DEFAULT_URL;

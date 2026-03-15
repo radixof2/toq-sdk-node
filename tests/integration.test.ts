@@ -24,10 +24,8 @@ function findBinary(): string {
 }
 
 const TOQ_BIN = findBinary();
-const ALICE_API = 29810;
-const ALICE_PROTO = 29809;
-const BOB_API = 29812;
-const BOB_PROTO = 29811;
+const ALICE_PORT = 29809;
+const BOB_PORT = 29811;
 
 let aliceDir: string;
 let bobDir: string;
@@ -36,7 +34,7 @@ function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-function setupInstance(name: string, apiPort: number, protoPort: number): string {
+function setupInstance(name: string, port: number): string {
   const dir = mkdtempSync(join(tmpdir(), `toq-sdk-it-${name}-`));
   execFileSync(TOQ_BIN, [
     "setup", "--non-interactive",
@@ -47,8 +45,7 @@ function setupInstance(name: string, apiPort: number, protoPort: number): string
 
   const configPath = join(dir, ".toq/config.toml");
   let config = readFileSync(configPath, "utf-8");
-  config = config.replace("port = 9009", `port = ${protoPort}`);
-  config = config.replace("api_port = 9010", `api_port = ${apiPort}`);
+  config = config.replace("port = 9009", `port = ${port}`);
   writeFileSync(configPath, config);
 
   execFileSync(TOQ_BIN, ["up"], { env: { ...process.env, HOME: dir } });
@@ -63,8 +60,8 @@ beforeAll(async () => {
   if (!existsSync(TOQ_BIN)) {
     throw new Error(`toq binary not found at ${TOQ_BIN}`);
   }
-  aliceDir = setupInstance("alice", ALICE_API, ALICE_PROTO);
-  bobDir = setupInstance("bob", BOB_API, BOB_PROTO);
+  aliceDir = setupInstance("alice", ALICE_PORT);
+  bobDir = setupInstance("bob", BOB_PORT);
   await sleep(2000);
 }, 20000);
 
@@ -74,8 +71,8 @@ afterAll(async () => {
   await sleep(500);
 });
 
-function alice(): Client { return connect(`http://127.0.0.1:${ALICE_API}`); }
-function bob(): Client { return connect(`http://127.0.0.1:${BOB_API}`); }
+function alice(): Client { return connect(`http://127.0.0.1:${ALICE_PORT}`); }
+function bob(): Client { return connect(`http://127.0.0.1:${BOB_PORT}`); }
 
 // ── Core: does the SDK actually work? ────────────────────────
 
@@ -97,7 +94,7 @@ describe("end-to-end message delivery", () => {
     // Alice sends to bob with wait=true
     const aliceClient = alice();
     const result = await aliceClient.send(
-      `toq://127.0.0.1:${BOB_PROTO}/bob`,
+      `toq://127.0.0.1:${BOB_PORT}/bob`,
       "hello from SDK",
       { wait: true }
     );
@@ -201,7 +198,7 @@ describe("SDK against real daemon", () => {
 
     await sleep(500);
 
-    const stream = await alice().streamStart(`toq://127.0.0.1:${BOB_PROTO}/bob`);
+    const stream = await alice().streamStart(`toq://127.0.0.1:${BOB_PORT}/bob`);
     expect(stream).toHaveProperty("stream_id");
     expect(stream).toHaveProperty("thread_id");
 
