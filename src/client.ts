@@ -9,12 +9,17 @@ function resolveUrl(url?: string): string {
   if (url) return url;
   const env = process.env[URL_ENV];
   if (env) return env;
-  const statePath = join(".toq", "state.json");
-  if (existsSync(statePath)) {
-    try {
-      const state = JSON.parse(readFileSync(statePath, "utf-8"));
-      if (state.port) return `http://127.0.0.1:${state.port}`;
-    } catch {}
+  const paths = [
+    join(".toq", "state.json"),
+    join(process.env.HOME || "~", ".toq", "state.json"),
+  ];
+  for (const statePath of paths) {
+    if (existsSync(statePath)) {
+      try {
+        const state = JSON.parse(readFileSync(statePath, "utf-8"));
+        if (state.port) return `http://127.0.0.1:${state.port}`;
+      } catch {}
+    }
   }
   return DEFAULT_URL;
 }
